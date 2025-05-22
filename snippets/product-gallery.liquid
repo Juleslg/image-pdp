@@ -75,15 +75,12 @@ only way to do it on Shopify right now.
   assign product_gallery_carousel_id = 'product-gallery-carousel-' | append: product.id | append: '-' | append: section.id
   assign filtered_indexes = null | sort
 
-  // --- START CONFIGURATION ---
-  // Set this to match exactly what's in your alt tags (lowercase "farbe")
-  assign ALT_TAG_OPTION_NAME_KEY = "farbe" | downcase 
+  comment 'Configuration - Start'
+  endcomment
+  
+  assign ALT_TAG_OPTION_NAME_KEY = "farbe" | downcase
+  assign CONTROLLING_OPTION_POSITION = 1
 
-  // Set this to the position of your Color/Farbe option in Shopify admin (1, 2, or 3)
-  assign CONTROLLING_OPTION_POSITION = 1 
-  // --- END CONFIGURATION ---
-
-  // Debug line - remove after testing
   echo 'DEBUG - Starting image filtering...'
 
   if product.variants.size > 1 and product.options.size >= CONTROLLING_OPTION_POSITION
