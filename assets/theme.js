@@ -3198,7 +3198,7 @@ onRerender_fn = function(event) {
   if (!this.hasAttribute("allow-partial-rerender") || event.detail.productChange) {
     this.replaceWith(matchingElement);
   } else {
-    const blockTypes = ["sku", "badges", "quantity-selector", "volume-pricing", "price", "payment-terms", "variant-picker", "inventory", "buy-buttons", "pickup-availability", "liquid"];
+    const blockTypes = ["sku", "badges", "quantity-selector", "volume-pricing", "price", "payment-terms", "variant-picker", "inventory", "buy-buttons", "pickup-availability", "liquid", "product-gallery"];
     blockTypes.forEach((blockType) => {
       this.querySelectorAll(`[data-block-type="${blockType}"]`).forEach((element) => {
         const matchingBlock = matchingElement.querySelector(`[data-block-type="${blockType}"][data-block-id="${element.getAttribute("data-block-id")}"]`);
@@ -3211,6 +3211,19 @@ onRerender_fn = function(event) {
               const existingQuantity = quantitySelectorElement.quantity;
               element.replaceWith(matchingBlock);
               matchingBlock.querySelector("quantity-selector").quantity = existingQuantity;
+            }
+          } else if (blockType === "product-gallery") {
+            // For product gallery, we need to update the filtered indexes and trigger a re-render
+            const gallery = element.querySelector("product-gallery");
+            if (gallery) {
+              const newGallery = matchingBlock.querySelector("product-gallery");
+              gallery.setAttribute("filtered-indexes", newGallery.getAttribute("filtered-indexes"));
+              gallery.setAttribute("data-selected-variant", newGallery.getAttribute("data-selected-variant"));
+              gallery.dispatchEvent(new CustomEvent("product:rerender", {
+                detail: {
+                  htmlFragment: matchingBlock
+                }
+              }));
             }
           } else {
             element.replaceWith(matchingBlock);
@@ -4447,7 +4460,7 @@ var CountdownTimerFlipDigit = class extends HTMLElement {
     }
     await animate15(this.shadowRoot.firstElementChild, { opacity: [1, 0], transform: ["translateY(0)", "translateY(-8px)"] }, { duration: 0.3, easing: [0.64, 0, 0.78, 0] }).finished;
     this.textContent = newValue;
-    animate15(this.shadowRoot.firstElementChild, { opacity: [0, 1], transform: ["translateY(8px)", "translateY(0px)"] }, { duration: 0.3, easing: [0.22, 1, 0.36, 1] });
+    animate15(this.shadowRoot.firstElementChild, { opacity: [0, 1], transform: ["translateY(8px)", "translateY(0)"] }, { duration: 0.3, easing: [0.22, 1, 0.36, 1] });
   }
 };
 if (!window.customElements.get("countdown-timer")) {

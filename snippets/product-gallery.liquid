@@ -89,13 +89,10 @@ only way to do it on Shopify right now.
 
     if image_controlling_option_object
       assign selected_value_for_controlling_option = image_controlling_option_object.selected_value | downcase
-      assign selected_value_dipped = selected_value_for_controlling_option | append: ' dipped'
-      assign selected_value_base = ''
-      if selected_value_for_controlling_option contains ' dipped'
-        assign selected_value_base = selected_value_for_controlling_option | remove: ' dipped'
-      endif
+      assign is_dipped_variant = selected_value_for_controlling_option contains ' dipped'
       
-      echo 'DEBUG - Selected base value: ' | append: selected_value_for_controlling_option
+      echo 'DEBUG - Selected value: ' | append: selected_value_for_controlling_option
+      echo 'DEBUG - Is dipped variant: ' | append: is_dipped_variant
 
       for media in product.media
         if media.alt contains '#' and media.alt != product.title
@@ -103,18 +100,19 @@ only way to do it on Shopify right now.
           assign media_group_parts = alt_parts.last | split: '_'
           assign option_name_from_alt_tag = media_group_parts.first | downcase | strip
           assign value_from_alt_tag = media_group_parts.last | downcase | strip
+          assign is_dipped_image = value_from_alt_tag contains ' dipped'
 
           echo 'DEBUG - Processing image. Alt tag value: ' | append: value_from_alt_tag
 
           if option_name_from_alt_tag == ALT_TAG_OPTION_NAME_KEY
-            # Check if this media should be filtered by comparing both normal and dipped versions
+            # Filter out if it's not an exact match (considering dipped status)
             assign should_filter = true
             
-            if value_from_alt_tag == selected_value_for_controlling_option
+            if is_dipped_variant and is_dipped_image and value_from_alt_tag == selected_value_for_controlling_option
+              # Keep dipped images only for dipped variants
               assign should_filter = false
-            elsif value_from_alt_tag == selected_value_dipped
-              assign should_filter = false
-            elsif selected_value_base != '' and value_from_alt_tag == selected_value_base
+            elsif is_dipped_variant == false and is_dipped_image == false and value_from_alt_tag == selected_value_for_controlling_option
+              # Keep non-dipped images only for non-dipped variants
               assign should_filter = false
             endif
 
@@ -132,7 +130,7 @@ only way to do it on Shopify right now.
   echo 'DEBUG - Final filtered indexes: ' | append: filtered_indexes | json
 %}
 
-<product-gallery class="product-gallery" form="{{ product_form_id }}" filtered-indexes="{{ filtered_indexes | json }}" {% if enable_media_autoplay %}autoplay-media{% endif %} {% if enable_image_zoom %}allow-zoom="{{ max_image_zoom_level }}"{% endif %} data-selected-variant="{{ product.selected_or_first_available_variant.id }}">
+<product-gallery class="product-gallery" form="{{ product_form_id }}" filtered-indexes="{{ filtered_indexes | json }}" {% if enable_media_autoplay %}autoplay-media{% endif %} {% if enable_image_zoom %}allow-zoom="{{ max_image_zoom_level }}"{% endif %} data-selected-variant="{{ product.selected_or_first_available_variant.id }}" data-product-handle="{{ product.handle }}" data-block-type="product-gallery" data-block-id="product-gallery-{{ product.id }}">
   {%- if enable_image_zoom -%}
     <open-lightbox-button class="contents">
       <button class="product-gallery__zoom-button circle-button circle-button--sm md:hidden">
