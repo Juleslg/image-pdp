@@ -89,6 +89,12 @@ only way to do it on Shopify right now.
 
     if image_controlling_option_object
       assign selected_value_for_controlling_option = image_controlling_option_object.selected_value | downcase
+      assign selected_value_dipped = selected_value_for_controlling_option | append: ' dipped'
+      assign selected_value_base = ''
+      if selected_value_for_controlling_option contains ' dipped'
+        assign selected_value_base = selected_value_for_controlling_option | remove: ' dipped'
+      endif
+      
       echo 'DEBUG - Selected base value: ' | append: selected_value_for_controlling_option
 
       for media in product.media
@@ -106,9 +112,9 @@ only way to do it on Shopify right now.
             
             if value_from_alt_tag == selected_value_for_controlling_option
               assign should_filter = false
-            elsif value_from_alt_tag == selected_value_for_controlling_option | append: ' dipped' 
+            elsif value_from_alt_tag == selected_value_dipped
               assign should_filter = false
-            elsif selected_value_for_controlling_option contains ' dipped' and value_from_alt_tag == selected_value_for_controlling_option | remove: ' dipped'
+            elsif selected_value_base != '' and value_from_alt_tag == selected_value_base
               assign should_filter = false
             endif
 
