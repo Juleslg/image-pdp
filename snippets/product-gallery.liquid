@@ -80,11 +80,12 @@ only way to do it on Shopify right now.
   
   assign ALT_TAG_OPTION_NAME_KEY = "farbe" | downcase
   assign CONTROLLING_OPTION_POSITION = 1
+  assign controlling_option_index = CONTROLLING_OPTION_POSITION | minus: 1
 
   echo 'DEBUG - Starting image filtering...'
 
   if product.variants.size > 1 and product.options.size >= CONTROLLING_OPTION_POSITION
-    assign image_controlling_option_object = product.options_with_values[CONTROLLING_OPTION_POSITION - 1]
+    assign image_controlling_option_object = product.options_with_values[controlling_option_index]
 
     if image_controlling_option_object
       assign selected_value_for_controlling_option = image_controlling_option_object.selected_value | downcase | append: ' dipped'
