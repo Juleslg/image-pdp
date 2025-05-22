@@ -92,8 +92,6 @@ only way to do it on Shopify right now.
 
   assign controlling_option_index = CONTROLLING_OPTION_POSITION | minus: 1
 
-  echo 'DEBUG - Starting image filtering...'
-
   if product.variants.size > 1 and CONTROLLING_OPTION_POSITION != null
     assign image_controlling_option_object = product.options_with_values[controlling_option_index]
 
@@ -103,9 +101,6 @@ only way to do it on Shopify right now.
       if selected_value_for_controlling_option contains ' dipped'
         assign is_dipped_variant = true
       endif
-      
-      echo 'DEBUG - Selected value: ' | append: selected_value_for_controlling_option
-      echo 'DEBUG - Is dipped variant: ' | append: is_dipped_variant
 
       for media in product.media
         if media.alt contains '#' and media.alt != product.title
@@ -117,8 +112,6 @@ only way to do it on Shopify right now.
           if value_from_alt_tag contains ' dipped'
             assign is_dipped_image = true
           endif
-
-          echo 'DEBUG - Processing image. Alt tag value: ' | append: value_from_alt_tag
 
           if ALT_TAG_OPTION_NAME_KEY contains option_name_from_alt_tag
             # Filter out if it's not an exact match (considering dipped status)
@@ -135,15 +128,12 @@ only way to do it on Shopify right now.
             if should_filter and media != default_media
               assign media_position = media.position | sort
               assign filtered_indexes = filtered_indexes | concat: media_position
-              echo 'DEBUG - Added to filtered indexes: ' | append: media_position
             endif
           endif
         endif
       endfor
     endif
   endif
-
-  echo 'DEBUG - Final filtered indexes: ' | append: filtered_indexes | json
 %}
 
 <product-gallery class="product-gallery" form="{{ product_form_id }}" filtered-indexes="{{ filtered_indexes | json }}" {% if enable_media_autoplay %}autoplay-media{% endif %} {% if enable_image_zoom %}allow-zoom="{{ max_image_zoom_level }}"{% endif %} data-selected-variant="{{ product.selected_or_first_available_variant.id }}" data-product-handle="{{ product.handle }}" data-block-type="product-gallery" data-block-id="product-gallery-{{ product.id }}">
@@ -157,12 +147,6 @@ only way to do it on Shopify right now.
   {%- endif -%}
 
   <div class="product-gallery__image-list">
-    {%- comment -%}
-    ----------------------------------------------------------------------------------------------------------------------
-    CAROUSEL
-    ----------------------------------------------------------------------------------------------------------------------
-    {%- endcomment -%}
-
     <div class="{% if mobile_controls == 'arrows' %}product-gallery__carousel-with-arrows{% else %}contents{% endif %}">
       {%- if mobile_controls == 'arrows' -%}
         <carousel-prev-button aria-controls="{{ product_gallery_carousel_id }}" class="contents">
@@ -209,10 +193,6 @@ only way to do it on Shopify right now.
                 {%- assign preload = false -%}
               {%- endif -%}
 
-              {%- comment -%}
-              NOTE: for the product gallery, the autoplay does not work in a similar way. It is always false at the product level,
-              and the product-gallery component itself will autoplay (if needed)
-              {%- endcomment -%}
               {%- render 'media', media: media, sizes: sizes, preload: preload, controls: true, playsinline: true, muted: enable_media_autoplay, loop: enable_video_looping, group: 'product' -%}
             </div>
           {%- endfor -%}
@@ -237,12 +217,6 @@ only way to do it on Shopify right now.
       {%- endif -%}
     </div>
 
-    {%- comment -%}
-    ----------------------------------------------------------------------------------------------------------------------
-    VIEW IN YOUR SPACE
-    ----------------------------------------------------------------------------------------------------------------------
-    {%- endcomment -%}
-
     {%- assign first_3d_model = product.media | where: 'media_type', 'model' | first -%}
 
     {%- if first_3d_model -%}
@@ -256,12 +230,6 @@ only way to do it on Shopify right now.
       </button>
     {%- endif -%}
   </div>
-
-  {%- comment -%}
-  ----------------------------------------------------------------------------------------------------------------------
-  CONTROLS
-  ----------------------------------------------------------------------------------------------------------------------
-  {%- endcomment -%}
 
   {%- if product.media.size > 1 or product == blank -%}
     {%- liquid

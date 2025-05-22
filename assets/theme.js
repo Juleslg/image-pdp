@@ -2842,7 +2842,7 @@ var ProductGallery = class extends HTMLElement {
     return __privateGet(this, _photoSwipeInstance);
   }
   get filteredIndexes() {
-    return JSON.parse(this.getAttribute("filtered-indexes")).map((index) => parseInt(index) - 1);
+    return JSON.parse(this.getAttribute("filtered-indexes") || "[]").map((index) => parseInt(index) - 1);
   }
   /**
    * Open the lightbox at the given index (by default, it opens the selected image)
@@ -2930,10 +2930,22 @@ onSectionRerender_fn = function(event) {
   if (!galleryMarkup) {
     return;
   }
-  if (galleryMarkup.filteredIndex !== this.filteredIndexes) {
-    this.carousel.filter(galleryMarkup.filteredIndexes);
-    this.setAttribute("filtered-indexes", galleryMarkup.getAttribute("filtered-indexes"));
+
+  // Update filtered indexes and trigger re-render
+  const newFilteredIndexes = galleryMarkup.getAttribute("filtered-indexes");
+  if (newFilteredIndexes !== this.getAttribute("filtered-indexes")) {
+    this.setAttribute("filtered-indexes", newFilteredIndexes);
+    this.carousel.filter(JSON.parse(newFilteredIndexes).map(index => parseInt(index) - 1));
   }
+
+  // Update selected variant
+  const newSelectedVariant = galleryMarkup.getAttribute("data-selected-variant");
+  if (newSelectedVariant !== this.getAttribute("data-selected-variant")) {
+    this.setAttribute("data-selected-variant", newSelectedVariant);
+  }
+
+  // Force a re-render of the carousel
+  this.carousel.refresh();
 };
 /**
  * When the variant changes, we check the alt tags for each media and filter them
