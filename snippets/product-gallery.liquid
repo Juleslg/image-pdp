@@ -70,26 +70,53 @@ only way to do it on Shopify right now.
 {%- endcomment -%}
 
 {% liquid
+  assign product_form_id = 'product-form-' | append: product.id | append: '-' | append: section.id
   assign default_media = product.selected_or_first_available_variant.featured_media | default: product.featured_media
   assign product_gallery_carousel_id = 'product-gallery-carousel-' | append: product.id | append: '-' | append: section.id
   assign filtered_indexes = null | sort
 
-  if product.variants.size > 1
-    for media in product.media
-      if media.alt contains '#' and media.alt != product.title
-        assign alt_parts = media.alt | split: '#'
-        assign media_group_parts = alt_parts.last | split: '_'
-        assign option = product.options_by_name[media_group_parts.first]
-        assign option_value = option.selected_value | downcase
-        assign downcase_group_value = media_group_parts.last | strip | downcase
+  // --- START CONFIGURATION ---
+  // 1. Set this to the option name string used in your alt tags (e.g., "Farbe").
+  //    This will be compared case-insensitively.
+  assign ALT_TAG_OPTION_NAME_KEY = "Farbe" | downcase 
 
-        if option_value != downcase_group_value and media != default_media
-          assign media_position = media.position | sort
-          assign filtered_indexes = filtered_indexes | concat: media_position
+  // 2. Set this to the numerical position (1, 2, or 3) of your "Color/Farbe" option
+  //    as defined in your product settings.
+  assign CONTROLLING_OPTION_POSITION = 1 
+  // --- END CONFIGURATION ---
+
+  if product.variants.size > 1 and product.options.size >= CONTROLLING_OPTION_POSITION
+    // Get the actual controlling option object for the current language using its position.
+    // Example: product.options_with_values[0] is the first option, product.options_with_values[1] is the second.
+    assign image_controlling_option_object = product.options_with_values[CONTROLLING_OPTION_POSITION - 1]
+
+    if image_controlling_option_object
+      // Get the currently selected value for this controlling option, in the current language.
+      assign selected_value_for_controlling_option = image_controlling_option_object.selected_value | downcase
+
+      for media in product.media
+ 
+        if media.alt contains '#' and media.alt != product.title
+          assign alt_parts = media.alt | split: '#'
+          assign media_group_parts = alt_parts.last | split: '_' // E.g., from "#Farbe_Rot" -> ["Farbe", "Rot"]
+          
+          assign option_name_from_alt_tag = media_group_parts.first | downcase
+          assign value_from_alt_tag = media_group_parts.last | strip | downcase // E.g., "rot"
+
+          // Check if the option name part of the alt tag matches our configured key.
+          if option_name_from_alt_tag == ALT_TAG_OPTION_NAME_KEY
+            // Compare the value from the alt tag (likely in your default language)
+            // with the selected value of the controlling option (in the current language).
+            if selected_value_for_controlling_option != value_from_alt_tag and media != default_media
+              assign media_position = media.position | sort
+              assign filtered_indexes = filtered_indexes | concat: media_position
+            endif
+          endif
         endif
-      endif
-    endfor
+      endfor
+    endif
   endif
+  
 %}
 
 <product-gallery class="product-gallery" form="{{ product_form_id }}" filtered-indexes="{{ filtered_indexes | json }}" {% if enable_media_autoplay %}autoplay-media{% endif %} {% if enable_image_zoom %}allow-zoom="{{ max_image_zoom_level }}"{% endif %}>
