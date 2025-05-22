@@ -2942,8 +2942,23 @@ onVariantChange_fn = function(event) {
   if (!event.detail.variant) {
     return;
   }
+
+  // Update the selected variant ID
+  this.setAttribute('data-selected-variant', event.detail.variant.id);
+
+  // Trigger a re-render of the gallery
+  const form = document.forms[this.getAttribute("form")];
+  form.dispatchEvent(new CustomEvent("product:rerender", {
+    detail: {
+      variant: event.detail.variant,
+      previousVariant: event.detail.previousVariant
+    }
+  }));
+
   if (event.detail.variant["featured_media"] && event.detail.previousVariant?.["featured_media"]?.["id"] !== event.detail.variant["featured_media"]["id"]) {
-    const position = event.detail.variant["featured_media"]["position"] - 1, filteredIndexBelowPosition = this.filteredIndexes.filter((filteredIndex) => filteredIndex < position);
+    const position = event.detail.variant["featured_media"]["position"] - 1;
+    const filteredIndexBelowPosition = this.filteredIndexes.filter((filteredIndex) => filteredIndex < position);
+    
     if (this.carousel.isScrollable) {
       this.carousel.select(position - filteredIndexBelowPosition.length, { instant: true });
     } else {
