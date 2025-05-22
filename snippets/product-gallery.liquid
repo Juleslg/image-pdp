@@ -88,8 +88,9 @@ only way to do it on Shopify right now.
     assign image_controlling_option_object = product.options_with_values[controlling_option_index]
 
     if image_controlling_option_object
-      assign selected_value_for_controlling_option = image_controlling_option_object.selected_value | downcase | append: ' dipped'
-      echo 'DEBUG - Selected value: ' | append: selected_value_for_controlling_option
+      assign selected_value_for_controlling_option = image_controlling_option_object.selected_value | downcase
+      assign selected_value_dipped = selected_value_for_controlling_option | append: ' dipped'
+      echo 'DEBUG - Selected value: ' | append: selected_value_dipped
 
       for media in product.media
         if media.alt contains '#' and media.alt != product.title
@@ -101,7 +102,7 @@ only way to do it on Shopify right now.
           echo 'DEBUG - Processing image. Alt tag value: ' | append: value_from_alt_tag
 
           if option_name_from_alt_tag == ALT_TAG_OPTION_NAME_KEY
-            if selected_value_for_controlling_option != value_from_alt_tag and media != default_media
+            if selected_value_for_controlling_option != value_from_alt_tag and selected_value_dipped != value_from_alt_tag and media != default_media
               assign media_position = media.position | sort
               assign filtered_indexes = filtered_indexes | concat: media_position
               echo 'DEBUG - Added to filtered indexes: ' | append: media_position
