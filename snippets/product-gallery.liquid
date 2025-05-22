@@ -89,7 +89,10 @@ only way to do it on Shopify right now.
 
     if image_controlling_option_object
       assign selected_value_for_controlling_option = image_controlling_option_object.selected_value | downcase
-      assign is_dipped_variant = selected_value_for_controlling_option contains ' dipped'
+      assign is_dipped_variant = false
+      if selected_value_for_controlling_option contains ' dipped'
+        assign is_dipped_variant = true
+      endif
       
       echo 'DEBUG - Selected value: ' | append: selected_value_for_controlling_option
       echo 'DEBUG - Is dipped variant: ' | append: is_dipped_variant
@@ -100,7 +103,10 @@ only way to do it on Shopify right now.
           assign media_group_parts = alt_parts.last | split: '_'
           assign option_name_from_alt_tag = media_group_parts.first | downcase | strip
           assign value_from_alt_tag = media_group_parts.last | downcase | strip
-          assign is_dipped_image = value_from_alt_tag contains ' dipped'
+          assign is_dipped_image = false
+          if value_from_alt_tag contains ' dipped'
+            assign is_dipped_image = true
+          endif
 
           echo 'DEBUG - Processing image. Alt tag value: ' | append: value_from_alt_tag
 
@@ -108,7 +114,7 @@ only way to do it on Shopify right now.
             # Filter out if it's not an exact match (considering dipped status)
             assign should_filter = true
             
-            if is_dipped_variant and is_dipped_image and value_from_alt_tag == selected_value_for_controlling_option
+            if is_dipped_variant == true and is_dipped_image == true and value_from_alt_tag == selected_value_for_controlling_option
               # Keep dipped images only for dipped variants
               assign should_filter = false
             elsif is_dipped_variant == false and is_dipped_image == false and value_from_alt_tag == selected_value_for_controlling_option
