@@ -1,0 +1,184 @@
+{% comment %}
+Split the filtered colors entered by the user and prepare them for comparison
+{% endcomment %}
+
+{% assign color_active = false %}
+{% assign rendered_variants = '' %}
+{% assign debug_counter = 0 %}
+
+{% comment %}Identify the color option index{% endcomment %}
+{% for option in product.options %}
+  {% if option == 'Color' or option == 'Farbe' %}
+    {% assign color_active = true %}
+    {% assign color_index = forloop.index0 %}
+    {% break %}
+  {% endif %}
+{% endfor %}
+
+{% comment %}Process filtered colors if filtering is enabled{% endcomment %}
+
+{% comment %}Check if there's a filtered_colors parameter in the URL{% endcomment %}
+{% if request.querystring contains 'filtered_colors=' %}
+  {% assign url_filtered_colors = '' %}
+  {% assign query_params = request.querystring | split: '&' %}
+  
+  {% for param in query_params %}
+    {% if param contains 'filtered_colors=' %}
+      {% assign param_parts = param | split: '=' %}
+      {% if param_parts.size > 1 %}
+        {% assign url_filtered_colors = param_parts[1] | url_decode %}
+        {% break %}
+      {% endif %}
+    {% endif %}
+  {% endfor %}
+  
+  {% if url_filtered_colors != blank %}
+    {% assign filtered_colors = url_filtered_colors %}
+    {% assign enable_color_filter = true %}
+  {% endif %}
+{% endif %}
+
+{% if enable_color_filter and filtered_colors != blank %}
+  {% assign filtered_colors_raw = filtered_colors | default: 'Sand' %}
+  {% assign filtered_colors_split = filtered_colors_raw | split: ',' %}
+  {% assign filtered_colors_array = '' %}
+
+  {% for color in filtered_colors_split %}
+    {% assign clean_color = color | strip | downcase %}
+    {% unless filtered_colors_array == '' %}
+      {% assign filtered_colors_array = filtered_colors_array | append: ',' %}
+    {% endunless %}
+    {% assign filtered_colors_array = filtered_colors_array | append: clean_color %}
+  {% endfor %}
+  {% assign filtered_colors_array = filtered_colors_array | split: ',' %}
+{% else %}
+  {% assign enable_color_filter = false %}
+{% endif %}
+
+<script>
+  console.log('Product: {{ product.title }} ({{ product.variants.size }} variants)');
+  console.log('Color Active: {{ color_active }} | Color Index: {{ color_index }}');
+  {% if enable_color_filter %}
+    console.log('Filtered Colors: {{ filtered_colors_array | join: ", " }}');
+  {% endif %}
+</script>
+
+{% if product.variants.size > 1 and color_active %}
+  {% for variant in product.variants %}
+    {% if variant.available %}
+      {% assign current_color = variant.options[color_index] | strip | downcase %}
+      {% unless rendered_variants contains current_color %}
+        {% if enable_color_filter and section.settings.color_filter_mode == 'theme_editor' %}
+          {% assign color_match = false %}
+          
+          {% for filter_color in filtered_colors_array %}
+            {% assign filter_color_clean = filter_color | strip | downcase %}
+            
+            {% comment %}Handle special character comparison{% endcomment %}
+            {% if filter_color_clean == current_color %}
+              {% assign color_match = true %}
+              {% assign match_reason = "exact match" %}
+              {% break %}
+            {% elsif filter_color_clean == 'naturweiß dipped' or filter_color_clean == 'naturweiss dipped' %}
+              {% if current_color == 'naturweiß dipped' or current_color == 'naturweiss dipped' %}
+                {% assign color_match = true %}
+                {% assign match_reason = "naturweiß dipped exact match" %}
+                {% break %}
+              {% endif %}
+            {% elsif filter_color_clean == 'naturweiß' or filter_color_clean == 'naturweiss' %}
+              {% if current_color == 'naturweiß' or current_color == 'naturweiss' %}
+                {% assign color_match = true %}
+                {% assign match_reason = "naturweiß exact match" %}
+                {% break %}
+              {% endif %}
+            {% elsif filter_color_clean == 'graublau dipped' %}
+              {% if current_color == 'graublau dipped' %}
+                {% assign color_match = true %}
+                {% assign match_reason = "graublau dipped exact match" %}
+                {% break %}
+              {% endif %}
+            {% elsif filter_color_clean == 'graublau' %}
+              {% if current_color == 'graublau' %}
+                {% assign color_match = true %}
+                {% assign match_reason = "graublau exact match" %}
+                {% break %}
+              {% endif %}
+            {% elsif filter_color_clean contains 'rosa dipped' or filter_color_clean contains 'rose dipped' or filter_color_clean contains 'rosé dipped' %}
+              {% if current_color contains 'rosa dipped' or current_color contains 'rose dipped' or current_color contains 'rosé dipped' %}
+                {% assign color_match = true %}
+                {% assign match_reason = "rosa dipped exact match" %}
+                {% break %}
+              {% endif %}
+            {% elsif filter_color_clean == 'rosa' or filter_color_clean == 'rose' or filter_color_clean == 'rosé' %}
+              {% if current_color == 'rosa' or current_color == 'rose' or current_color == 'rosé' %}
+                {% assign color_match = true %}
+                {% assign match_reason = "rosa exact match" %}
+                {% break %}
+              {% endif %}
+            {% endif %}
+          {% endfor %}
+          
+          <script>
+            console.log('Checking color: {{ current_color }} | Match: {{ color_match }}{% if color_match %} | Reason: {{ match_reason }}{% endif %}');
+          </script>
+          
+          {% if color_match %}
+            {% assign debug_counter = debug_counter | plus: 1 %}
+            <div class="product-card-wrapper" data-color="{{ current_color }}">
+              {% render 'color-product-card', variant_sel: variant, product: product, reveal: reveal, hide_product_information: hide_product_information, stacked: true, colorname: current_color, tabs2: tabs2 %}
+            </div>
+            {% assign rendered_variants = rendered_variants | append: current_color | append: ',' %}
+          {% endif %}
+        {% else %}
+          {% assign debug_counter = debug_counter | plus: 1 %}
+          <div class="product-card-wrapper" data-color="{{ current_color }}">
+            {% render 'color-product-card', variant_sel: variant, product: product, reveal: reveal, hide_product_information: hide_product_information, stacked: true, colorname: current_color, tabs2: tabs2 %}
+          </div>
+          {% assign rendered_variants = rendered_variants | append: current_color | append: ',' %}
+        {% endif %}
+      {% endunless %}
+    {% endif %}
+  {% endfor %}
+{% elsif product.variants.size == 1 %}
+  {% if enable_color_filter and section.settings.color_filter_mode == 'theme_editor' %}
+    {% comment %}Skip single-variant products when color filtering is enabled and they don't have color options{% endcomment %}
+  {% else %}
+    {% assign debug_counter = debug_counter | plus: 1 %}
+    {% assign variant = product.variants.first %}
+    
+    {% comment %}Check if this is a product with a color option that should be included in filtering{% endcomment %}
+    {% assign has_color = false %}
+    {% assign product_color = '' %}
+    
+    {% for option in product.options_with_values %}
+      {% if option.name == 'Color' or option.name == 'Farbe' %}
+        {% assign has_color = true %}
+        {% assign product_color = variant.options[forloop.index0] | strip | downcase %}
+        {% break %}
+      {% endif %}
+    {% endfor %}
+    
+    {% if has_color %}
+      <div class="product-card-wrapper" data-color="{{ product_color }}">
+        {% render 'color-product-card', product: product, variant_sel: variant, reveal: reveal, hide_product_information: hide_product_information, stacked: true, colorname: product_color %}
+      </div>
+    {% else %}
+      <div class="product-card-wrapper">
+        {% render 'color-product-card', product: product, variant_sel: variant, reveal: reveal, hide_product_information: hide_product_information, stacked: true %}
+      </div>
+    {% endif %}
+  {% endif %}
+{% else %}
+  {% if enable_color_filter and section.settings.color_filter_mode == 'theme_editor' %}
+    {% comment %}Skip products without variants when color filtering is enabled{% endcomment %}
+  {% else %}
+    {% assign debug_counter = debug_counter | plus: 1 %}
+    <div class="product-card-wrapper">
+      {% render 'color-product-card', product: product, reveal: reveal, hide_product_information: hide_product_information, stacked: true %}
+    </div>
+  {% endif %}
+{% endif %}
+
+<script>
+  console.log('Rendered Variants: {{ debug_counter }} | Colors: {{ rendered_variants }}');
+</script>

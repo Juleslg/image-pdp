@@ -1,0 +1,26 @@
+{%- comment -%}
+----------------------------------------------------------------------------------------------------------------------
+VARIANT URL HELPER
+----------------------------------------------------------------------------------------------------------------------
+
+This snippet helps generate proper URLs for variants in the pagination system.
+
+********************************************
+Supported variables
+********************************************
+
+* product: the product to which the variant belongs
+* variant: the variant for which to generate the URL
+{%- endcomment -%}
+
+{%- liquid
+  # Generate the URL with the variant ID
+  assign variant_url = product.url | append: '?variant=' | append: variant.id
+  
+  # If we're in a collection context, add the collection handle to maintain pagination context
+  if collection.handle != blank
+    assign variant_url = variant_url | append: '&collection=' | append: collection.handle
+  endif
+-%}
+
+{{ variant_url }} 

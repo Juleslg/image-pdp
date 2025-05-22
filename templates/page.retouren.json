@@ -1,0 +1,80 @@
+/*
+ * ------------------------------------------------------------
+ * IMPORTANT: The contents of this file are auto-generated.
+ *
+ * This file may be updated by the Shopify admin theme editor
+ * or related systems. Please exercise caution as any changes
+ * made to this file may be overwritten.
+ * ------------------------------------------------------------
+ */
+{
+  "sections": {
+    "main": {
+      "type": "main-page",
+      "settings": {
+        "color_scheme": "scheme-2",
+        "show_title": true,
+        "page_width": "xs"
+      }
+    },
+    "faq_DKN4w4": {
+      "type": "faq",
+      "blocks": {
+        "question_y4GmxR": {
+          "type": "question",
+          "settings": {
+            "question": "Wie melde ich meine Retoure an?",
+            "answer": "<ol><li>Überprüfe zuerst deine Bestätigungsmail deiner Bestellung, in der du das Retourenformular findest. Drucke dieses Formular aus und fülle es vollständig und sorgfältig aus, damit alle Angaben korrekt sind.</li><li>Lege anschließend das ausgefüllte Formular in dein Paket, erstelle dein eigenes Paketlabel, bringe es gut sichtbar auf dem Paket an und versende das Paket an folgende Adresse:<br/><br/><strong>Owl Oneworldlogistics GmbH<br/>c/o onomao<br/>Ettore-Bugatti-Straße 39<br/>51149 Köln<br/>Germany<br/><br/></strong></li><li>Sobald dein Paket im Lager angekommen ist, wird es von uns geprüft und die Erstattung erfolgt spätestens 14 Tage nach Eingang der Ware.</li></ol>"
+          }
+        },
+        "question_9UyDBF": {
+          "type": "question",
+          "settings": {
+            "question": "Wie lange kann ich Produkte zurückschicken?",
+            "answer": "<p>Innerhalb der ersten 14 Tage hast du im Rahmen des gesetzlichen Widerrufrechts grundsätzlich die Möglichkeit deine Produkte an uns zurückzuschicken.</p>"
+          }
+        },
+        "question_FnR7q9": {
+          "type": "question",
+          "settings": {
+            "question": "Ich habe etwas gekauft, das einen Defekt hat. Was kann ich jetzt tun?",
+            "answer": "<p>Leider kann es in seltenen Fällen vorkommen, dass deine Bestellung beschädigt bei dir eintrifft (bitte denke daran, dass B-Ware Mängel keinen Defekt darstellen). <br/><br/>Schreibe uns bitte eine Mail an help@onomao.com mit deiner Bestellnummer als auch Bildern von den beschädigten Produkten.</p>"
+          }
+        },
+        "question_p3wpNM": {
+          "type": "question",
+          "settings": {
+            "question": "Wie lange dauert es, bis ich mein Geld erstattet bekomme?",
+            "answer": "<p>Die Rückerstattung der retournierten Artikel erhältst du schnellstmöglich innerhalb von 14 Werktagen nach Erhalt der Retoure und zwar über die Zahlungsart, die du für deinen Einkauf verwendet hast.</p>"
+          }
+        },
+        "question_FXVT4R": {
+          "type": "question",
+          "settings": {
+            "question": "Kann ich Artikel umtauschen?",
+            "answer": "<p>Ein Umtausch von Artikeln ist leider nicht möglich. Eine Neubestellung kannst du aber ganz bequem über den Onlineshop auslösen.</p>"
+          }
+        }
+      },
+      "block_order": [
+        "question_y4GmxR",
+        "question_9UyDBF",
+        "question_FnR7q9",
+        "question_p3wpNM",
+        "question_FXVT4R"
+      ],
+      "settings": {
+        "color_scheme": "scheme-2",
+        "separate_section_with_border": false,
+        "show_categories": false,
+        "subheading": "",
+        "title": "",
+        "content": ""
+      }
+    }
+  },
+  "order": [
+    "main",
+    "faq_DKN4w4"
+  ]
+}
