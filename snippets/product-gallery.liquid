@@ -78,13 +78,23 @@ only way to do it on Shopify right now.
   comment 'Configuration - Start'
   endcomment
   
-  assign ALT_TAG_OPTION_NAME_KEY = "farbe" | downcase
-  assign CONTROLLING_OPTION_POSITION = 1
+  assign ALT_TAG_OPTION_NAME_KEY = 'color,farbe' | split: ',' | map: 'downcase'
+  assign CONTROLLING_OPTION_POSITION = null
+
+  # Find the color option position
+  for option in product.options_with_values
+    assign option_name = option.name | downcase
+    if ALT_TAG_OPTION_NAME_KEY contains option_name
+      assign CONTROLLING_OPTION_POSITION = forloop.index
+      break
+    endif
+  endfor
+
   assign controlling_option_index = CONTROLLING_OPTION_POSITION | minus: 1
 
   echo 'DEBUG - Starting image filtering...'
 
-  if product.variants.size > 1 and product.options.size >= CONTROLLING_OPTION_POSITION
+  if product.variants.size > 1 and CONTROLLING_OPTION_POSITION != null
     assign image_controlling_option_object = product.options_with_values[controlling_option_index]
 
     if image_controlling_option_object
@@ -110,7 +120,7 @@ only way to do it on Shopify right now.
 
           echo 'DEBUG - Processing image. Alt tag value: ' | append: value_from_alt_tag
 
-          if option_name_from_alt_tag == ALT_TAG_OPTION_NAME_KEY
+          if ALT_TAG_OPTION_NAME_KEY contains option_name_from_alt_tag
             # Filter out if it's not an exact match (considering dipped status)
             assign should_filter = true
             
